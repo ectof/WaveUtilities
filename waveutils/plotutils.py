@@ -66,14 +66,24 @@ def addcomment(comment, location = "lower left", color = "k", fontsize = 9):
 
     return
 
-def plot2d(dataframe, flip = False, colorbar = True, **kwargs):
+def plot2d(dataframe, flip = False, colorbar = True, cblabel="",
+    xlabel = "", ylabel = "", **kwargs):
 
     if flip:
         pb.pcolormesh(dataframe.columns,dataframe.index,dataframe,**kwargs)
     else:
         pb.pcolormesh(dataframe.index,dataframe.columns,dataframe.T,**kwargs)
     if colorbar:
-        pb.colorbar()
+        if cblabel:
+            pb.colorbar(label = cblabel)
+        else:
+            pb.colorbar()
+
+    if xlabel:
+        pb.xlabel(xlabel)
+
+    if ylabel:
+        pb.ylabel(ylabel)
 
     return
 

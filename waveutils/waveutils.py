@@ -96,8 +96,8 @@ def loadWave(wv, folder = "/DataExport/", scale = None, name = None,
             wvFrame[i] = pd.Panel.from_dict(dict(zip(head,list_)))
             wvFrame[i].minor_axis = map(np.float64, wvFrame[i].minor_axis)
 
-            wvFrame[i].major_axis = np.polyval(majorscale,wvFrame[i].index)
-            wvFrame[i].minor_axis = np.polyval(minorscale,wvFrame[i].index)
+            wvFrame[i].major_axis = np.polyval(majorscale,wvFrame[i].major_axis)
+            wvFrame[i].minor_axis = np.polyval(minorscale,wvFrame[i].minor_axis)
         
             if wvFrame[i].minor_axis[0] > wvFrame[i].minor_axis[-1]:
                 wvFrame[i] = wvFrame[i].iloc[:,:,::-1]
