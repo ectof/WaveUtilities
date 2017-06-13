@@ -30,7 +30,7 @@ def niagara(data, indices = [None],
     
     return img
 
-def addcomment(comment, location = "lower left", color = "k", fontsize = 9):
+def addcomment(comment, location = "lower left", color = "k", fontsize = 9, box = True, **kwargs):
 
     location = location.split(" ")
     if location[0] == "lower":
@@ -61,8 +61,14 @@ def addcomment(comment, location = "lower left", color = "k", fontsize = 9):
         x = 0.05
         ha = "left"
 
-    pb.annotate(comment, xy = [x,y], xycoords = "axes fraction",
-        ha = ha, va = va, color = color, fontsize = fontsize)
+    bbox_props = dict(boxstyle="round",pad = 0.2 , fc="w", ec="0.5", alpha=0.5)
+
+    if box:
+        pb.annotate(comment, xy = [x,y], xycoords = "axes fraction",
+            ha = ha, va = va, color = color, fontsize = fontsize, bbox = bbox_props)
+    else:
+        pb.annotate(comment, xy = [x,y], xycoords = "axes fraction",
+            ha = ha, va = va, color = color, fontsize = fontsize)
 
     return
 
