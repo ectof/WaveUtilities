@@ -11,12 +11,12 @@ with open('LICENSE') as f:
 
 setup(
     name='waveutils',
-    version='0.1.1',
-    description='Sample package for Python-Guide.org',
+    version='0.1.2.0',
+    description='Some utilities for data analysis',
     long_description=readme,
     author='Eoin',
     author_email='eoin@eoin.com',
-    url='https://github.com/kennethreitz/samplemod',
+    url='https://github.com/ectof/WaveUtilities',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )

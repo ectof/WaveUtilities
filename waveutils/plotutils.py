@@ -6,7 +6,7 @@ import string as sg
 import pylab as pb
 import warnings
 from matplotlib.colors import LogNorm, SymLogNorm
-
+import datetime
 
 def niagara(data, indices = [None],
             delta = 0., cmap = "viridis",
@@ -30,7 +30,51 @@ def niagara(data, indices = [None],
     
     return img
 
-def addcomment(comment, location = "lower left", color = "k", fontsize = 9, box = True, **kwargs):
+def add_date(date_str="", location = "upper right", color = "k", fontsize = 6, box = True, **kwargs):
+
+    location = location.split(" ")
+    if location[0] == "lower":
+        y = 0.
+        va = "bottom"
+    elif location[0] == "upper":
+        y = 1.
+        va = "top"
+    else:
+        warnings.warn("first location argument should be lower/upper, setting upper")
+        y = 1.
+        va = "top"
+
+    if location[1] == "left":
+        x = 0.0
+        ha = "left"
+    elif location[1] == "center":
+        x = 0.5
+        ha = "center"
+    elif location[1] == "right":
+        x = 1.
+        ha = "right"
+    else:
+        warnings.warn("second location argument should be left/center/right, setting right")
+        x = 1.
+        ha = "right"
+
+    bbox_props = dict(boxstyle="round", pad = 0.01, fc="w", ec="None", alpha=0.75)
+
+    if date_str:
+        pass
+    else:
+        date_str = datetime.datetime.now().strftime("%y/%m/%d-%H:%M")
+
+    if box:
+        pb.annotate(date_str, xy = [x,y], xycoords = "axes fraction",
+            ha = ha, va = va, color = color, fontsize = fontsize, bbox = bbox_props)
+    else:
+        pb.annotate(date_str, xy = [x,y], xycoords = "axes fraction",
+            ha = ha, va = va, color = color, fontsize = fontsize)
+
+    return
+
+def add_comment(comment, location = "lower left", color = "k", fontsize = 9, box = True, **kwargs):
 
     location = location.split(" ")
     if location[0] == "lower":
@@ -61,7 +105,7 @@ def addcomment(comment, location = "lower left", color = "k", fontsize = 9, box 
         x = 0.05
         ha = "left"
 
-    bbox_props = dict(boxstyle="round",pad = 0.2 , fc="w", ec="0.5", alpha=0.5)
+    bbox_props = dict(boxstyle="round",pad = 0.2 , fc="w", ec="0.5", alpha=0.75)
 
     if box:
         pb.annotate(comment, xy = [x,y], xycoords = "axes fraction",
@@ -94,7 +138,7 @@ def plot2d(dataframe, flip = False, colorbar = True, cblabel="",
     return
 
 
-def plotmultiwaves(waves, item, titles = "", **kwargs):
+def plot_multi(waves, item, titles = "", **kwargs):
 
     if not("vmax" in kwargs):
         vmax = waves[0].loc[item].get_values().max()
