@@ -168,6 +168,8 @@ def plot_multi(waves, item, titles = "", **kwargs):
             try:
                 plot2d(v.loc[item],**kwargs)
             except ValueError:
+                ax = pb.gca()
+                ax.remove()
                 kwargs["vmin"] = kwargs["vmax"] * 1e-4
                 plot2d(v.loc[item],**kwargs)
                 pass

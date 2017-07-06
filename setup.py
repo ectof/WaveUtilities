@@ -11,11 +11,11 @@ with open('LICENSE') as f:
 
 setup(
     name='waveutils',
-    version='0.1.2.0',
+    version='0.1.2.1',
     description='Some utilities for data analysis',
     long_description=readme,
-    author='Eoin',
-    author_email='eoin@eoin.com',
+    author='Eoin O\'Farrell',
+    author_email='eoin.ofarrell@nbi.ku.dk',
     url='https://github.com/ectof/WaveUtilities',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
