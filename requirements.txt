@@ -1,2 +1,8 @@
 nose
 sphinx
+matplotlib
+scipy
+numpy
+xarray
+pandas
+datetime
