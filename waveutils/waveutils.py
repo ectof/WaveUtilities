@@ -233,7 +233,11 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
                     wvList[i][dims[1]].attrs = {"name":fancy_dims[dims[1]][0],
                                         "units":fancy_dims[dims[1]][1]}
 
-        wvList[i].attrs = {"name":"%d" % wv[i]}
+        try:
+            wvList[i].attrs = {"name":"%d" % wv[i]}
+        except TypeError:
+            wvList[i].attrs = {"name":"%d" % wv}
+
                 
     return wvList
 
