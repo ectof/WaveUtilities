@@ -332,7 +332,7 @@ def make_comment(variables,fancy_dims=None,new_line=3):
             tmp = tmp + str(variables[key]) + "\ "
         
         comment = comment + tmp
-        if (i > 0) and (not((i+1)%newline)) and (i<len(variables)-1):
+        if (i > 0) and (not((i+1)%new_line)) and (i<len(variables)-1):
             comment = comment + "$\n$"
     
     comment = comment + "$"
