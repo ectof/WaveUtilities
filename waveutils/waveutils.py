@@ -5,9 +5,20 @@ import numpy as np
 import os.path as path
 import xarray as xarray
 import warnings
+from xarray import Dataset as Dataset
 
 
-# modifications to switch from panel to xarray
+class WvSet(Dataset):
+    
+    def combine_first(self, new_ds):
+        
+        combined_ds = super(WvSet, self).combine_first(new_ds)
+        try:
+            combined_ds.attrs = {"name": self.name + " " + new_ds.name}
+        except AttributeError:
+            pass
+        return combined_ds
+
 
 def return_wave_path(wv, folder = "\\DataExport\\"):
     
@@ -160,10 +171,15 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
 
     for i,v in enumerate(wvPath):
         if not v:
-            warnings.warn("Index %d not found, dropping" % wv[i])
             del wvPath[i]
             del wvList[i]
-            del wv[i]
+            try:
+                del wv[i]
+                warnings.warn("Index %d not found, dropping" % wv[i])
+            except TypeError:
+                warnings.warn("Index %d not found, dropping" % wv[i])
+                wv = list(wv)
+                del wv[i]
 
     for i,v in enumerate(wvPath):
 
@@ -207,10 +223,10 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
 
 
             if j == 0:
-                wvList[i] = xarray.Dataset({inst.loc[u,"name"]:df})
+                wvList[i] = WvSet({inst.loc[u,"name"]:df})
 
             else:
-                wvList[i].update(xarray.Dataset({inst.loc[u,"name"]:df}))
+                wvList[i].update(WvSet({inst.loc[u,"name"]:df}))
 
         
         if dimension == 1:

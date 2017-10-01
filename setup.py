@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name='waveutils',
-    version='0.1.3.1',
+    version='0.1.3.3',
     description='Some utilities for data analysis and file IO',
     long_description=readme,
     author='Eoin O\'Farrell',
