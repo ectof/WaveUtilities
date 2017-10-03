@@ -331,7 +331,7 @@ def plot_wvs(waves, item, put_title = True, title = None , **kwargs):
         plt.ylim(ymin,ymax)
         plt.xlim(xmin,xmax)
         if put_title:
-            plt.title(title)
+            plt.title("$" + title + "$")
 
     return img
 
