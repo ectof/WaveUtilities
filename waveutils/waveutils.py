@@ -9,10 +9,15 @@ from xarray import Dataset as Dataset
 
 
 class WvSet(Dataset):
+
+    def __init__(self,*args):
+        super(WvSet, self).__init__(*args)
+                
     
     def combine_first(self, new_ds):
         
         combined_ds = super(WvSet, self).combine_first(new_ds)
+        combined_ds = WvSet(combined_ds)
         try:
             combined_ds.attrs = {"name": self.name + " " + new_ds.name}
         except AttributeError:

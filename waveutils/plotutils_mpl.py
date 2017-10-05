@@ -296,7 +296,7 @@ def plot_wvs(waves, item, put_title = True, title = None , **kwargs):
     for i,v in enumerate(waves):
 
         if make_title:
-            title += "\#" + v.name + " "
+            title += "\#" + v.name + "\ "
         
         if i == 0:
             ymin = v[item][v[item].dims[1]].min()
