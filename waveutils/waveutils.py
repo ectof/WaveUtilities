@@ -179,8 +179,8 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             del wvPath[i]
             del wvList[i]
             try:
-                del wv[i]
                 warnings.warn("Index %d not found, dropping" % wv[i])
+                del wv[i]
             except TypeError:
                 warnings.warn("Index %d not found, dropping" % wv[i])
                 wv = list(wv)
