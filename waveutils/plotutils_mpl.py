@@ -299,13 +299,15 @@ def plot_wvs(waves, item, put_title = True, title = None , **kwargs):
             title += "\#" + v.name + "\ "
         
         if i == 0:
-            ymin = v[item][v[item].dims[1]].min()
-            ymax = v[item][v[item].dims[1]].max()
+            if v.dimension == 2:
+                ymin = v[item][v[item].dims[1]].min()
+                ymax = v[item][v[item].dims[1]].max()
             xmin = v[item][v[item].dims[0]].min()
             xmax = v[item][v[item].dims[0]].max()
         else:
-            ymin = min(ymin, v[item][v[item].dims[1]].min())
-            ymax = max(ymax, v[item][v[item].dims[1]].max())
+            if v.dimension == 2:
+                ymin = min(ymin, v[item][v[item].dims[1]].min())
+                ymax = max(ymax, v[item][v[item].dims[1]].max())
             xmin = min(xmin, v[item][v[item].dims[0]].min())
             xmax = max(xmax, v[item][v[item].dims[0]].max())        
 
@@ -328,7 +330,8 @@ def plot_wvs(waves, item, put_title = True, title = None , **kwargs):
                 img = plot_wv(v[item],**kwargs)
                 pass
 
-        plt.ylim(ymin,ymax)
+        if v.dimension == 2:
+            plt.ylim(ymin,ymax)
         plt.xlim(xmin,xmax)
         if put_title:
             plt.title("$" + title + "$")

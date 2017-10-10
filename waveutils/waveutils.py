@@ -39,7 +39,6 @@ def return_wave_path(wv, folder = "\\DataExport\\"):
         A list of wave paths.
 
     """
-
     currentDir = os.getcwd()
     fdrPath = folder
     # check if it's a list of wave numbers
@@ -67,7 +66,6 @@ def return_instruments(paths):
         A dictionary of instruments and paths
 
     """
-
     new_instruments = dict()
     
     for i,v in enumerate(paths):
@@ -149,7 +147,6 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
         A list of xarray datasets each containing dataarrays with the variables
 
     """
-
     wvPath = return_wave_path(wv, folder = folder)
     wvList = [None] * len(wvPath)
 
@@ -213,8 +210,12 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             wvList[i][dims[0]] = np.polyval(majorscale,wvList[i][dims[0]])
             wvList[i].sortby(wvList[i].coords[dims[0]],ascending=True)
             if fancy_dims is not None:
+                try:
                     wvList[i][dims[0]].attrs = {"name":fancy_dims[dims[0]][0],
-                                        "units":fancy_dims[dims[0]][1]}
+                    "units":fancy_dims[dims[0]][1]}
+                except KeyError:
+                    wvList[i][dims[0]].attrs = {"name":"major",
+                    "units":""}
 
         elif dimension == 2:
         
@@ -223,12 +224,18 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             wvList[i] = wvList[i].sortby(wvList[i].coords[dims[0]],ascending=True)
             wvList[i] = wvList[i].sortby(wvList[i].coords[dims[1]],ascending=True)
             if fancy_dims is not None:
+                try:
                     wvList[i][dims[0]].attrs = {"name":fancy_dims[dims[0]][0],
-                                        "units":fancy_dims[dims[0]][1]}
+                    "units":fancy_dims[dims[0]][1]}
                     wvList[i][dims[1]].attrs = {"name":fancy_dims[dims[1]][0],
-                                        "units":fancy_dims[dims[1]][1]}
-        
-        wvList[i].attrs = {"name":"%d" % wv[i]}
+                    "units":fancy_dims[dims[1]][1]}
+                except KeyError:
+                    wvList[i][dims[0]].attrs = {"name":"major",
+                    "units":""}
+                    wvList[i][dims[1]].attrs = {"name":"minor",
+                    "units":""}
+
+        wvList[i].attrs = {"name":"%d" % wv[i],"dimension":dimension}
                 
     return wvList
 
