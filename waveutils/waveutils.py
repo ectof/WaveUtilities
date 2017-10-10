@@ -6,6 +6,7 @@ import os.path as path
 import xarray as xarray
 import warnings
 from xarray import Dataset as Dataset
+from .helpers import Instruments
 
 
 class WvSet(Dataset):
@@ -19,7 +20,7 @@ class WvSet(Dataset):
         combined_ds = super(WvSet, self).combine_first(new_ds)
         combined_ds = WvSet(combined_ds)
         try:
-            combined_ds.attrs = {"name": self.name + " " + new_ds.name}
+            combined_ds.attrs = {"name": self.name + ",\," + new_ds.name}
         except AttributeError:
             pass
         return combined_ds
@@ -45,7 +46,7 @@ def return_wave_path(wv, folder = "\\DataExport\\"):
     try:
         dataPath = [None] * len(wv)
     except:
-        wv = [wv]
+        wv = list(wv)
         dataPath = [None] * len(wv)
     
     for i,v in enumerate(wv):
@@ -54,47 +55,27 @@ def return_wave_path(wv, folder = "\\DataExport\\"):
         
     return dataPath
 
-def return_instruments(paths, instruments = None):
+def return_instruments(paths):
 
     """Return paths to specific instruments and how they
     should be scaled. Typically not a user function.
 
     Args:
         paths: A list of paths to wave files 
-        instruments (optional): A pandas dataframe object with columns: name, scale and units.
-            The index is the igor name of the variable, e.g. Vx1
 
     Returns:
-        A pandas dataframe of instruments including the datafile path
+        A dictionary of instruments and paths
 
     """
 
-    if instruments is not None:
-        try:
-            if (instruments.keys() == ["name","scale","units"]).all():
-                pass
-            else:
-                warnings.warn("Instruments should be a dataframe with \"name\" "
-                              "e.g. \"Vx1\", \"scale\" e.g. 1e3, \"units\" e.g. \"V\" ")
-        except:
-            pass
-
-    new_instruments = pd.DataFrame(columns = ["name","scale","units","path"])
+    new_instruments = dict()
     
     for i,v in enumerate(paths):
         
         filename = path.split(v)[-1]
         tmp = re.match(r"([a-z]+)([0-9]+)", filename, re.I)
         tmp = tmp.group()
-        try:
-            if (tmp in instruments.index):
-                new_instruments.loc[tmp] = instruments.loc[tmp]
-                new_instruments.loc[tmp,"path"] = v
-            else:
-                warnings.warn("%s found, but is not in instrument list" % tmp)
-                new_instruments.loc[tmp] = [tmp,1.,"",v]
-        except:
-            new_instruments.loc[tmp] = [tmp,1.,"",v]
+        new_instruments.update({tmp:v})
             
     return new_instruments
 
@@ -156,15 +137,13 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
     Args:
         wv: A wave index or list of indices
         folder (optional): the folder to look waves, defults to "DataExport"
-        instruments (optional): A pandas dataframe object with columns: name, scale and units.
-            The index is the igor name of the variable, e.g. Vx1. Defaults to None
+        instruments (optional): An instacne of the instuments class
         dims (optional): names of the dimensions, defaults to major and minor
         majorscale (optional): list of polynomial coefficients through which the first
             dimension will be scaled, defaults to [1,0]
         minorscale (optional): list of polynomial coefficients through which the second
             dimension will be scaled, defaults to [1,0]
-        fancy_dims (optional): a dictionary to look up fancy variable names for the dimensions.
-            Keys should be name e.g. V_wire and units e.g. mV. These will be used for making plots
+        fancy_dims (optional): dict to look up axis names and units for plotting
 
     Returns:
         A list of xarray datasets each containing dataarrays with the variables
@@ -174,65 +153,60 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
     wvPath = return_wave_path(wv, folder = folder)
     wvList = [None] * len(wvPath)
 
+    if isinstance(wv,list):
+        pass
+    else:
+        wv = list(wv)
+
     for i,v in enumerate(wvPath):
         if not v:
             del wvPath[i]
             del wvList[i]
-            try:
-                warnings.warn("Index %d not found, dropping" % wv[i])
-                del wv[i]
-            except TypeError:
-                warnings.warn("Index %d not found, dropping" % wv[i])
-                wv = list(wv)
-                del wv[i]
+            warnings.warn("Index %d not found, dropping" % wv[i])
+            del wv[i]
 
     for i,v in enumerate(wvPath):
 
-        inst = return_instruments(v, instruments = instruments)
+        inst = return_instruments(v)
         
-        for j,u in enumerate(inst.index):
+        for j,u in enumerate(inst.keys()):
 
             if j == 0:
-                dimension = get_dimension(inst.loc[u,"path"])
+                dimension = get_dimension(inst[u])
 
-            if dims is None:
-                if dimension == 1:
-                    dims = ["major"]
-                else:
-                    dims = ["major","minor"]
+            if dimension != len(dims):
+                dims = ["major","minor"]
+                warnings.warn("Incorrect number of dimensions, resetting to [major,minor]")
 
             if dimension == 1:
-                df = pd.read_table(inst.loc[u,"path"], index_col=1,
+                df = pd.read_table(inst[u], index_col=1,
                     skiprows=0, dtype=np.float64,
-                    header=0, names=["crap", inst.loc[u,"name"]])
+                    header=0, names=["crap", u])
                 df = df.dropna(axis=1,how="all")
                 df = df.dropna()
                 df = df.iloc[:,0]
                 df.index.name = dims[0]
-                df = df / inst.loc[u,"scale"]
                 df = df.to_xarray()
-                df.attrs = {"units":inst.loc[u,"units"]}
-
 
             elif dimension == 2:
-                df = pd.read_table(inst.loc[u,"path"], index_col=1,
+                df = pd.read_table(inst[u], index_col=1,
                     skiprows=2, dtype=np.float64, header=0)
                 df = df.dropna(axis=1,how="all")
                 df = df.dropna()
                 df.columns = map(np.float64, df.columns)
-                df = df / inst.loc[u,"scale"]
                 df = xarray.DataArray(df.get_values(),
                     coords=[(dims[0],df.index),(dims[1],df.columns)])
-                df.name = inst.loc[u,"name"]
-                df.attrs = {"units":inst.loc[u,"units"]}
-
 
             if j == 0:
-                wvList[i] = WvSet({inst.loc[u,"name"]:df})
+                wvList[i] = xarray.Dataset({u:df})
 
             else:
-                wvList[i].update(WvSet({inst.loc[u,"name"]:df}))
+                wvList[i].update({u:df})
 
+        if instruments is not None:
+            wvList[i] = instruments.output_gen(wvList[i].copy())
+
+        wvList[i] = WvSet(wvList[i])
         
         if dimension == 1:
         
@@ -253,12 +227,8 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
                                         "units":fancy_dims[dims[0]][1]}
                     wvList[i][dims[1]].attrs = {"name":fancy_dims[dims[1]][0],
                                         "units":fancy_dims[dims[1]][1]}
-
-        try:
-            wvList[i].attrs = {"name":"%d" % wv[i]}
-        except TypeError:
-            wvList[i].attrs = {"name":"%d" % wv}
-
+        
+        wvList[i].attrs = {"name":"%d" % wv[i]}
                 
     return wvList
 

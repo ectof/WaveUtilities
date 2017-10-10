@@ -219,7 +219,7 @@ def plot_wv(dataArray,fancy_name = None, nolabel = False,
             if dataArray.name in fancy_name:
                 ylabel = fancy_name[dataArray.name].pop()
         else:
-            ylabel = "$%s" % dataArray.name
+            ylabel = "$%s" % dataArray.attrs["name"]
         if "units" in dataArray.attrs:
             unit_str = "\ (" + dataArray.attrs["units"] + ")$"
             ylabel = " ".join((ylabel,unit_str))
@@ -235,7 +235,7 @@ def plot_wv(dataArray,fancy_name = None, nolabel = False,
             if dataArray.name in fancy_name:
                 ylabel = fancy_name[dataArray.name].pop()
         else:
-            ylabel = "$%s" % dataArray.name
+            ylabel = "$%s" % dataArray.attrs["name"]
         if "units" in dataArray.attrs:
             unit_str = "\ (" + dataArray.attrs["units"] + ")$"
             ylabel = " ".join((ylabel,unit_str))

@@ -20,15 +20,14 @@ def get_slice(dataArray, direction = 0, plot = False, new_dim = "major"):
 	shape = np.shape(dataArray)
 	index_min = min(range(len(shape)), key = shape.__getitem__)
 	idc = np.empty((2,min(shape)),dtype=np.int64)
+
 	if not direction:
 		idc[index_min,:] = np.arange(shape[index_min],dtype=np.int64)
 	else:
 		idc[index_min,:] = np.flipud(np.arange(shape[index_min],dtype=np.int64))
 
 	idc[int(not index_min),:] = np.linspace(0,max(shape)-1,num=shape[index_min],dtype=np.int64)
-    
-    #pb.plot(dataArray[dataArray.dims[0]][idc[0,:]],dataArray[dataArray.dims[1]][idc[1,:]])
-    
+        
 	data_slice = np.empty((3,min(shape)))
 	data_slice[2,:] = [dataArray[i].values for i in zip(idc[0,:],idc[1,:])]
 	data_slice[0,:] = [dataArray[dataArray.dims[0]][i].values for i in idc[0,:]]
@@ -38,7 +37,6 @@ def get_slice(dataArray, direction = 0, plot = False, new_dim = "major"):
 		axes = range(2)
 	elif new_dim == "minor":
 		axes = range(1,-1,-1)
-
         
 	dataArray_slice = xarray.DataArray(data_slice[2,:],
 		coords = [data_slice[axes[0],:]],
@@ -57,7 +55,6 @@ def get_slice(dataArray, direction = 0, plot = False, new_dim = "major"):
 	dataSet_slice = xarray.Dataset({dataArray.name: dataArray_slice,
 			dataArray.dims[axes[1]]:coord_slice})
        
-    
 	if plot:
 		plot_wv(dataSet_slice[dataArray.name])
 
