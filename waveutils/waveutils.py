@@ -20,7 +20,8 @@ class WvSet(Dataset):
         combined_ds = super(WvSet, self).combine_first(new_ds)
         combined_ds = WvSet(combined_ds)
         try:
-            combined_ds.attrs = {"name": self.name + ",\," + new_ds.name,"dimension":self.dimension}
+            combined_ds.attrs = {"name": self.attrs["name"] + ",\," + new_ds.attrs["name"],
+            "dimension":self.attrs["dimension"]}
         except AttributeError:
             pass
         return combined_ds
