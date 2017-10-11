@@ -317,18 +317,23 @@ def plot_wvs(waves, item, put_title = True, title = None , **kwargs):
             except ValueError:
                 ax = plt.gca()
                 ax.remove()
-                kwargs["vmin"] = kwargs["vmax"] * 1e-4
+                try:
+                    kwargs["vmin"] = kwargs["vmax"] * 1e-4
+                except KeyError:
+                    kwargs["vmin"] = 1e-4
                 img = plot_wv(v[item],add_colorbar=False,**kwargs)
-                pass
+
         else:
             try:
                 img = plot_wv(v[item],**kwargs)
             except ValueError:
                 ax = plt.gca()
                 ax.remove()
-                kwargs["vmin"] = kwargs["vmax"] * 1e-4
+                try:
+                    kwargs["vmin"] = kwargs["vmax"] * 1e-4
+                except KeyError:
+                    kwargs["vmin"] = 1e-4
                 img = plot_wv(v[item],**kwargs)
-                pass
 
         if v.dimension == 2:
             plt.ylim(ymin,ymax)
