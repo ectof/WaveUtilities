@@ -140,7 +140,7 @@ def make_comment(variables,fancy_dims=None,new_line=3):
     comment = comment + "$"
     return comment
 
-def add_comment(comment, location = "lower left", color = "k",
+def add_comment(comment, location = "upper right", color = "k",
     fontsize = 9, box = True, **kwargs):
 
     """Add a comment to a matplotlib plot
@@ -164,7 +164,7 @@ def add_comment(comment, location = "lower left", color = "k",
         y = y_dict[location[0]]
     except KeyError:
         warnings.warn("first location argument should be lower/center/upper, setting lower")
-        y = y_dict("lower")
+        y = y_dict("upper")
 
     try:
         x = x_dict[location[1]]
