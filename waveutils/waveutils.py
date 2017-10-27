@@ -260,7 +260,7 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             wvList[i].sortby(wvList[i].coords[dims[j]],ascending=True)
 
         if fancy_dims is not None:
-            for j in range(dimension)
+            for j in range(dimension):
                 try:
                     wvList[i][dims[j]].attrs = {"name":fancy_dims[dims[j]][0],
                     "units":fancy_dims[dims[j]][1]}
