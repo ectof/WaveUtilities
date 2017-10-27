@@ -53,7 +53,7 @@ def return_wave_path(wv, folder = "\\DataExport\\", qcodes = False):
         
     return dataPath
 
-def return_instruments(paths):
+def return_instruments_dimension(paths, qcodes = False):
 
     """Return paths to specific instruments and how they
     should be scaled. Typically not a user function.
@@ -67,14 +67,26 @@ def return_instruments(paths):
     """
     new_instruments = dict()
     
-    for i,v in enumerate(paths):
-        
-        filename = path.split(v)[-1]
-        tmp = re.match(r"([a-z]+)([0-9]+)", filename, re.I)
-        tmp = tmp.group()
-        new_instruments.update({tmp:v})
+    if qcodes:
+        for i,v in enumerate(paths):
+            fdr, filename = path.split(v)
+            dimension =  int(path.split(fdr)[-1].split("_")[1][0])
+            fp = open(v)
+            line1 = fp.readline()
+            inst = line1.split()[dimension[i]+1:]
+            for j,u in enumerate(inst):
+                new_instruments.update({"_".join(u.split("_")[:-1]):v})
             
-    return new_instruments
+    else:
+        for i,v in enumerate(paths):
+            filename = path.split(v)[-1]
+            tmp = re.match(r"([a-z]+)([0-9]+)", filename, re.I)
+            tmp = tmp.group()
+            new_instruments.update({tmp:v})
+            if i == 0:
+                dimension = get_dimension(v)
+            
+    return new_instruments, dimension
 
 def thres_merge(smalldata, largedata, threshold):
 
@@ -168,12 +180,9 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
 
     for i,v in enumerate(wvPath):
 
-        inst = return_instruments(v)
+        inst, dimension = return_instruments_dimension(v)
         
         for j,u in enumerate(inst.keys()):
-
-            if j == 0:
-                dimension = get_dimension(inst[u])
 
             if dimension != len(dims):
                 dims = ["major","minor"]
