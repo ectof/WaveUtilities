@@ -40,6 +40,8 @@ def return_wave_path(wv, folder = "\\DataExport\\", qcodes = False):
         A list of wave paths.
 
     """
+
+    dataPath = [None] * len(wv)
     
     for i,v in enumerate(wv):
         # search for wv.txt files
