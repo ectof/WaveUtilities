@@ -142,7 +142,7 @@ def get_dimension(wvPath):
 
 def return_data_set(instruments, dimension, dims = ["major","minor"], qcodes = False):
     
-    if qc:
+    if qcodes:
         
         filepath = next (iter (instruments.values()))
         data = np.loadtxt(filepath)
