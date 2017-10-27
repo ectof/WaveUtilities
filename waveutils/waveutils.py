@@ -5,6 +5,7 @@ import numpy as np
 import os.path as path
 import xarray as xarray
 import warnings
+from collections import OrderedDict
 from xarray import Dataset as Dataset
 from .helpers import Instruments
 
@@ -65,7 +66,7 @@ def return_instruments_dimension(paths, qcodes = False):
         A dictionary of instruments and paths
 
     """
-    new_instruments = dict()
+    new_instruments = OrderedDict()
     
     if qcodes:
         for i,v in enumerate(paths):
@@ -182,11 +183,11 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
 
         inst, dimension = return_instruments_dimension(v)
         
-        for j,u in enumerate(inst.keys()):
+        if dimension != len(dims):
+            dims = ["major","minor"]
+            warnings.warn("Incorrect number of dimensions, resetting to [major,minor]")
 
-            if dimension != len(dims):
-                dims = ["major","minor"]
-                warnings.warn("Incorrect number of dimensions, resetting to [major,minor]")
+        for j,u in enumerate(inst.keys()):
 
             if dimension == 1:
                 df = pd.read_table(inst[u], index_col=1,
