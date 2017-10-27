@@ -73,7 +73,7 @@ def return_instruments_dimension(paths, qcodes = False):
             dimension =  int(path.split(fdr)[-1].split("_")[1][0])
             fp = open(v)
             line1 = fp.readline()
-            inst = line1.split()[dimension[i]+1:]
+            inst = line1.split()[dimension+1:]
             for j,u in enumerate(inst):
                 new_instruments.update({"_".join(u.split("_")[:-1]):v})
             
