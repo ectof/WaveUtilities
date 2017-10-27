@@ -71,7 +71,10 @@ def return_instruments_dimension(paths, qcodes = False):
     if qcodes:
         for i,v in enumerate(paths):
             fdr, filename = path.split(v)
-            dimension =  int(path.split(fdr)[-1].split("_")[1][0])
+            try:
+                dimension =  int(path.split(fdr)[-1].split("_")[1][0])
+            except ValueError:
+                dimension = 1
             fp = open(v)
             line1 = fp.readline()
             inst = line1.split()[dimension+1:]
