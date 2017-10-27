@@ -242,7 +242,7 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
 
     for i,v in enumerate(wvPath):
 
-        inst, dimension = return_instruments_dimension(v)
+        inst, dimension = return_instruments_dimension(v, qcodes = qcodes)
         
         if dimension != len(dims):
             dims = ["major","minor"]
