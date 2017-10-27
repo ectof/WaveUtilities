@@ -140,6 +140,64 @@ def get_dimension(wvPath):
 
     return dimension
 
+def return_data_set(instruments, dimension, dims = ["major","minor"], qcodes = False):
+    
+    if qc:
+        
+        filepath = next (iter (instruments.values()))
+        data = np.loadtxt(filepath)
+        major_vals = data[:,0]
+        if dimension == 2:
+            minor_size = next((i for i, x in enumerate(np.diff(data[:,0])) if x), None)
+            minor_size += 1
+            minor_vals = data[:minor_size,1]
+            major_vals = data[::minor_size,0]
+            major_size = len(major_vals)
+        else:
+            major_vals = data[:,0]
+        
+        for j,u in enumerate(instruments.keys()):
+            if dimension == 2:
+                df = xarray.DataArray(data[:,j+dimension].reshape(major_size, minor_size),
+                    coords=[(dims[0],major_vals),(dims[1],minor_vals)])
+            else:
+                 df = xarray.DataArray(data[:,j+dimension],
+                    coords=[(dims[0],major_vals)])               
+        
+            if j == 0:
+                data_set = xarray.Dataset({u:df})
+            else:
+                data_set.update({u:df})        
+    else:
+        
+        for j,u in enumerate(instruments.keys()):
+
+            if dimension == 1:
+                df = pd.read_table(inst[u], index_col=1,
+                    skiprows=0, dtype=np.float64,
+                    header=0, names=["crap", u])
+                df = df.dropna(axis=1,how="all")
+                df = df.dropna()
+                df = df.iloc[:,0]
+                df.index.name = dims[0]
+                df = df.to_xarray()
+
+            elif dimension == 2:
+                df = pd.read_table(inst[u], index_col=1,
+                    skiprows=2, dtype=np.float64, header=0)
+                df = df.dropna(axis=1,how="all")
+                df = df.dropna()
+                df.columns = map(np.float64, df.columns)
+                df = xarray.DataArray(df.get_values(),
+                    coords=[(dims[0],df.index),(dims[1],df.columns)])
+
+            if j == 0:
+                data_set = xarray.Dataset({u:df})
+            else:
+                data_set.update({u:df})
+           
+    return data_set
+
 def load_wave(wv, folder = "/DataExport/", instruments = None,
     dims = ["major","minor"],
     majorscale = [1.,0], minorscale = [1.,0],
@@ -190,66 +248,24 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             dims = ["major","minor"]
             warnings.warn("Incorrect number of dimensions, resetting to [major,minor]")
 
-        for j,u in enumerate(inst.keys()):
-
-            if dimension == 1:
-                df = pd.read_table(inst[u], index_col=1,
-                    skiprows=0, dtype=np.float64,
-                    header=0, names=["crap", u])
-                df = df.dropna(axis=1,how="all")
-                df = df.dropna()
-                df = df.iloc[:,0]
-                df.index.name = dims[0]
-                df = df.to_xarray()
-
-            elif dimension == 2:
-                df = pd.read_table(inst[u], index_col=1,
-                    skiprows=2, dtype=np.float64, header=0)
-                df = df.dropna(axis=1,how="all")
-                df = df.dropna()
-                df.columns = map(np.float64, df.columns)
-                df = xarray.DataArray(df.get_values(),
-                    coords=[(dims[0],df.index),(dims[1],df.columns)])
-
-            if j == 0:
-                wvList[i] = xarray.Dataset({u:df})
-
-            else:
-                wvList[i].update({u:df})
+        wvList[i] = return_data_set(inst, dimension, dims = dims, qcodes = qcodes)
 
         if instruments is not None:
             wvList[i] = instruments.output_gen(wvList[i].copy())
 
         wvList[i] = WvSet(wvList[i])
-        
-        if dimension == 1:
-        
-            wvList[i][dims[0]] = np.polyval(majorscale,wvList[i][dims[0]])
-            wvList[i].sortby(wvList[i].coords[dims[0]],ascending=True)
-            if fancy_dims is not None:
-                try:
-                    wvList[i][dims[0]].attrs = {"name":fancy_dims[dims[0]][0],
-                    "units":fancy_dims[dims[0]][1]}
-                except KeyError:
-                    wvList[i][dims[0]].attrs = {"name":"major",
-                    "units":""}
 
-        elif dimension == 2:
-        
-            wvList[i][dims[0]] = np.polyval(majorscale,wvList[i][dims[0]])
-            wvList[i][dims[1]] = np.polyval(minorscale,wvList[i][dims[1]])
-            wvList[i] = wvList[i].sortby(wvList[i].coords[dims[0]],ascending=True)
-            wvList[i] = wvList[i].sortby(wvList[i].coords[dims[1]],ascending=True)
-            if fancy_dims is not None:
+        for j in range(dimension):
+            wvList[i][dims[j]] = np.polyval(majorscale,wvList[i][dims[j]])
+            wvList[i].sortby(wvList[i].coords[dims[j]],ascending=True)
+
+        if fancy_dims is not None:
+            for j in range(dimension)
                 try:
-                    wvList[i][dims[0]].attrs = {"name":fancy_dims[dims[0]][0],
-                    "units":fancy_dims[dims[0]][1]}
-                    wvList[i][dims[1]].attrs = {"name":fancy_dims[dims[1]][0],
-                    "units":fancy_dims[dims[1]][1]}
+                    wvList[i][dims[j]].attrs = {"name":fancy_dims[dims[j]][0],
+                    "units":fancy_dims[dims[j]][1]}
                 except KeyError:
-                    wvList[i][dims[0]].attrs = {"name":"major",
-                    "units":""}
-                    wvList[i][dims[1]].attrs = {"name":"minor",
+                    wvList[i][dims[j]].attrs = {"name":"major",
                     "units":""}
 
         wvList[i].attrs = {"name":"%d" % wv[i],"dimension":dimension}
