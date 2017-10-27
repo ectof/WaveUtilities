@@ -27,7 +27,7 @@ class WvSet(Dataset):
         return combined_ds
 
 
-def return_wave_path(wv, folder = "\\DataExport\\"):
+def return_wave_path(wv, folder = "\\DataExport\\", qcodes = False):
     
     """Return the path to the wave.
     Typically not a user function.
@@ -40,18 +40,14 @@ def return_wave_path(wv, folder = "\\DataExport\\"):
         A list of wave paths.
 
     """
-    currentDir = os.getcwd()
-    fdrPath = folder
-    # check if it's a list of wave numbers
-    try:
-        dataPath = [None] * len(wv)
-    except:
-        wv = list(wv)
-        dataPath = [None] * len(wv)
     
     for i,v in enumerate(wv):
         # search for wv.txt files
-        dataPath[i] = glob.glob(fdrPath + "*" + "_%d.txt" % v)
+        if qcodes:
+            dataPath[i] = glob.glob(folder + "**/" + "#%03d_" % v + "*" + "/*.dat",
+                recursive = True)
+        else:
+            dataPath[i] = glob.glob(folder + "*" + "_%d.txt" % v)
         
     return dataPath
 
@@ -129,7 +125,7 @@ def get_dimension(wvPath):
 def load_wave(wv, folder = "/DataExport/", instruments = None,
     dims = ["major","minor"],
     majorscale = [1.,0], minorscale = [1.,0],
-    fancy_dims = None):
+    fancy_dims = None, qcodes = False):
 
     """Load the wave data
 
@@ -143,18 +139,23 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
         minorscale (optional): list of polynomial coefficients through which the second
             dimension will be scaled, defaults to [1,0]
         fancy_dims (optional): dict to look up axis names and units for plotting
+        qcodes (optional): read data from qcodes format, defaults to False (i.e. Igor)
 
     Returns:
         A list of xarray datasets each containing dataarrays with the variables
 
     """
-    wvPath = return_wave_path(wv, folder = folder)
-    wvList = [None] * len(wvPath)
 
     if isinstance(wv,list):
         pass
     else:
-        wv = list(wv)
+        try:
+            wv = list(wv)
+        except TypeError:
+            wv = [wv]
+
+    wvPath = return_wave_path(wv, folder = folder, qcodes = qcodes)
+    wvList = [None] * len(wvPath)
 
     for i,v in enumerate(wvPath):
         if not v:
