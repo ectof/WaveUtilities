@@ -162,7 +162,7 @@ def return_data_set(instruments, dimension, dims = ["major","minor"], qcodes = F
         fp.readline()
         fp.readline()
         line3 = fp.readline()
-        datashape = int(line3.split()[1:])
+        datashape = [int(i) for i in line3.split()[1:]]
         fp.close()
         data = np.loadtxt(filepath)
         if dimension == 2:
