@@ -270,7 +270,7 @@ def load_wave(wv, folder = "/DataExport/", instruments = None,
             wvList[i] = instruments.output_gen(wvList[i].copy())
         else:
             for var in wvList[i]:
-                var.attrs = {"name":var,"units":""}
+                wvList[i][var].attrs = {"name":var,"units":""}
 
         wvList[i] = WvSet(wvList[i])
 
