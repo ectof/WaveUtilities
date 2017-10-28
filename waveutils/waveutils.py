@@ -71,12 +71,12 @@ def return_instruments_dimension(paths, qcodes = False):
     if qcodes:
         for i,v in enumerate(paths):
             fdr, filename = path.split(v)
-            try:
-                dimension =  int(path.split(fdr)[-1].split("_")[1][0])
-            except ValueError:
-                dimension = 1
             fp = open(v)
-            line1 = fp.readline()
+            line1 =fp.readline()
+            fp.readline()
+            line3 = fp.readline()
+            fp.close()
+            dimension = len(line3.split()) - 1
             inst = line1.split()[dimension+1:]
             for j,u in enumerate(inst):
                 new_instruments.update({"_".join(u.split("_")[:-1]):v})
@@ -141,20 +141,36 @@ def get_dimension(wvPath):
     return dimension
 
 def return_data_set(instruments, dimension, dims = ["major","minor"], qcodes = False):
+
+    """Load the wave data into a xarray dataset
+
+    Args:
+        instruments: dict of instruments and paths 
+        dimension: dimension (1 or 2)
+        dims (optional): names of the dimensions, defaults to major and minor
+        qcodes (optional): read data from qcodes format, defaults to False (i.e. Igor)
+
+    Returns:
+        A list of xarray datasets each containing dataarrays with the variables
+
+    """
     
     if qcodes:
         
         filepath = next (iter (instruments.values()))
+        fp = open(filepath)
+        fp.readline()
+        fp.readline()
+        line3 = fp.readline()
+        datashape = int(line3.split()[1:])
+        fp.close()
         data = np.loadtxt(filepath)
-        major_vals = data[:,0]
         if dimension == 2:
-            minor_size = next((i for i, x in enumerate(np.diff(data[:,0])) if x), None)
-            minor_size += 1
-            minor_vals = data[:minor_size,1]
-            major_vals = data[::minor_size,0]
-            major_size = len(major_vals)
+            minor_vals = data[:datashape[-1],1]
+            major_vals = data[::datashape[-1],0]
         else:
             major_vals = data[:,0]
+
         
         for j,u in enumerate(instruments.keys()):
             if dimension == 2:
