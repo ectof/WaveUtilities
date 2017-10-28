@@ -174,11 +174,11 @@ def return_data_set(instruments, dimension, dims = ["major","minor"], qcodes = F
         
         for j,u in enumerate(instruments.keys()):
             if dimension == 2:
-                df = xarray.DataArray(data[:,j+dimension].reshape(major_size, minor_size),
+                df = xarray.DataArray(data[:,j+dimension].reshape(datashape[0], datashape[1]),
                     coords=[(dims[0],major_vals),(dims[1],minor_vals)])
             else:
                  df = xarray.DataArray(data[:,j+dimension],
-                    coords=[(dims[0],major_vals)])               
+                    coords=[(dims[0],datashape[0])])               
         
             if j == 0:
                 data_set = xarray.Dataset({u:df})
